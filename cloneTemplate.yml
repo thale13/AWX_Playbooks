@@ -1,0 +1,54 @@
+---
+- name: Deploy VM 
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create a VM from a template
+      vmware_guest:
+        hostname: "vcenter.halehouse.org"
+        validate_certs: False
+        datacenter: Home
+        cluster: Lab
+        name: testvm-1
+        template: centos7-template
+        folder: /Home/vm
+        hardware:
+          memory_mb: 1024
+          num_cpus: 1
+        networks:
+        - name: Wireless
+          ip: 192.168.2.101
+          netmask: 255.255.255.0
+          gateway: 192.168.2.254
+          domain: halehouse.org
+          dns_servers:
+          - 192.168.1.254
+        customization:
+          dns_servers:
+          - 192.168.1.254
+          domain: halehouse.org
+        wait_for_ip_address: no
+      delegate_to: localhost
+      register: deploy
+    - name: fix disks on vm
+      vmware_guest_disk: 
+        hostname: "vcenter.halehouse.org"
+        datacenter: Home
+        validate_certs: False
+        name: testvm-1
+        disk:
+          - size_gb: 4
+            type: thin
+            datastore: IS_Disk2
+            state: present
+            scsi_controller: 2
+            unit_number: 0
+            scsi_type: 'paravirtual'
+          - size_gb: 6
+            type: thin
+            state: present
+            datastore: IS_Disk3
+            scsi_controller: 1
+            unit_number: 0
+      delegate_to: localhost
+      register: deploy
