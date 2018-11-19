@@ -1,6 +1,6 @@
 ---
 - name: Deploy VM 
-  hosts: localhost
+  hosts: all
   gather_facts: no
   tasks:
     - name: Create a VM from a template
